@@ -595,3 +595,4 @@
     localStorage.removeItem(STORAGE_KEYS.current);
   }
 })();
+
