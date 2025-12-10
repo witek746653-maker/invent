@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Инвентаризация ресторана</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root {
+      --bg: #0c0c10;
+      --panel: #161622;
+      --border: rgba(255, 255, 255, 0.06);
+      --text: #f7f7f7;
+      --muted: #b4b6c2;
+      --accent: #ffd166;
+      --accent-2: #ff8c42;
+      --danger: #ff6b6b;
+      --success: #2ecc71;
+      --shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "SF Pro Display", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 10% 20%, rgba(255,209,102,0.05), transparent 30%),
+                  radial-gradient(circle at 90% 10%, rgba(255,140,66,0.06), transparent 26%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 10px;
+      gap: 12px;
+    }
+    .title {
+      font-size: clamp(22px, 2vw, 28px);
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 209, 102, 0.18);
+      color: var(--accent);
+      font-size: 13px;
+      border: 1px solid rgba(255, 209, 102, 0.35);
+    }
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,209,102,0.16), rgba(255,140,66,0.14));
+      color: var(--text);
+      padding: 14px 16px;
+      min-width: 160px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 0.08s ease, filter 0.18s ease;
+    }
+    .btn:active { transform: translateY(1px) scale(0.99); }
+    .btn.secondary { background: #1f1f2c; border-color: rgba(255,255,255,0.08); }
+    .btn.danger { background: linear-gradient(135deg, #ff6b6b, #ff8c42); color: #111; border: none; }
+    .btn.small { padding: 10px 12px; min-width: 0; font-weight: 600; }
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr 380px;
+      gap: 14px;
+      padding: 10px 14px 20px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 200px;
+    }
+    .panel h2 { margin: 0 0 4px; font-size: 18px; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 14px; color: var(--muted); }
+    input, select, textarea {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #11111a;
+      padding: 12px;
+      color: var(--text);
+      font-size: 15px;
+    }
+    input:focus, select:focus, textarea:focus { outline: 2px solid rgba(255,209,102,0.4); }
+    textarea { resize: vertical; min-height: 80px; }
+    .stack { display: flex; gap: 10px; flex-wrap: wrap; }
+    .chip-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip {
+      background: #1f1f2c;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .chip.active { background: rgba(255,209,102,0.18); border-color: rgba(255,209,102,0.35); color: var(--accent); }
+    .list {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: #11111a;
+    }
+    .item-row, .history-row {
+      display: grid;
+      grid-template-columns: 1.4fr 0.9fr 0.9fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .item-row:last-child, .history-row:last-child { border-bottom: none; }
+    .item-title { font-weight: 700; }
+    .item-sub { font-size: 13px; color: var(--muted); }
+    .tag { padding: 4px 8px; border-radius: 10px; background: rgba(255,209,102,0.14); color: var(--accent); border: 1px solid rgba(255,209,102,0.3); font-size: 12px; }
+    .pill-danger { background: rgba(255,107,107,0.1); color: var(--danger); border-color: rgba(255,107,107,0.35); }
+    .pill-success { background: rgba(46,204,113,0.1); color: var(--success); border-color: rgba(46,204,113,0.35); }
+    .count-input { width: 100%; }
+    .count-stack { display: flex; align-items: center; gap: 8px; }
+    .note-flag { color: var(--accent); font-size: 12px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .section-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .history-card { padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: #1b1b27; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .history-card.active { border-color: rgba(255,209,102,0.4); background: rgba(255,209,102,0.08); }
+    .badge { padding: 4px 10px; border-radius: 999px; background: #11111a; border: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+    .low { color: var(--danger); font-weight: 700; }
+    .diff-pos { color: var(--success); }
+    .diff-neg { color: var(--danger); }
+    .flex-between { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .scroll { overflow: auto; max-height: 500px; padding: 2px; }
+    .help { font-size: 13px; line-height: 1.4; color: var(--muted); }
+    .divider { height: 1px; background: var(--border); margin: 6px 0; }
+    @media (max-width: 1200px) {
+      .layout { grid-template-columns: 1fr; }
+      .scroll { max-height: none; }
+    }
+    @media (max-width: 720px) {
+      header { padding: 14px; }
+      .layout { padding: 10px; }
+      .item-row, .history-row { grid-template-columns: 1fr; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">Ресторан · учёт посуды и инвентаря <span class="pill">офлайн локально</span></div>
+    <div class="cta-row">
+      <button class="btn" id="new-session">Начать инвентаризацию</button>
+      <button class="btn secondary" id="save-session">Сохранить результаты</button>
+      <button class="btn secondary" id="reset-session">Сбросить текущий подсчёт</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="panel" id="filters">
+      <h2>Поиск и фильтры</h2>
+      <div class="field">
+        <label for="search">Поиск по названию</label>
+        <input id="search" type="search" placeholder="Например, тарелки, бокалы..." />
+      </div>
+      <div class="stack">
+        <div class="field" style="flex:1">
+          <label for="filter-category">Категория</label>
+          <select id="filter-category"></select>
+        </div>
+        <div class="field" style="flex:1">
+          <label for="filter-location">Локация</label>
+          <select id="filter-location"></select>
+        </div>
+      </div>
+      <div class="stack">
+        <label class="chip" id="toggle-archived"><input type="checkbox" id="show-archived" /> Показать архив</label>
+        <label class="chip" id="toggle-low"><input type="checkbox" id="low-stock-only" /> Только ниже минимума</label>
+      </div>
+      <div class="divider"></div>
+      <div class="section-title"><h2>Новая позиция</h2><span class="muted">Добавление пополняет каталог</span></div>
+      <form id="item-form" class="field" autocomplete="off">
+        <div class="stack">
+          <div class="field" style="flex:1"><label>Название*</label><input required name="name" placeholder="Бокалы, тарелки..." /></div>
+          <div class="field" style="flex:1"><label>Категория*</label><input required name="category" placeholder="Столовые приборы" /></div>
+        </div>
+        <div class="stack">
+          <div class="field" style="flex:1"><label>Локация</label><input name="location" placeholder="Кухня, бар, склад" /></div>
+          <div class="field" style="width:140px"><label>Минимум</label><input name="min" type="number" min="0" placeholder="PAR" /></div>
+        </div>
+        <div class="field"><label>Примечание / описание</label><textarea name="note" placeholder="Материал, набор, единицы измерения"></textarea></div>
+        <button type="submit" class="btn">Добавить в каталог</button>
+      </form>
+      <div class="help">Данные сохраняются в памяти устройства. Архивируйте позиции, которые больше не используются, чтобы они остались в истории.</div>
+    </section>
+
+    <section class="panel" id="inventory">
+      <div class="section-title">
+        <h2>Подсчёт и накопление</h2>
+        <div class="badge" id="session-status">Нет активной инвентаризации</div>
+      </div>
+      <div class="toolbar">
+        <button class="chip" id="category-shortcut">Фильтр по категории</button>
+        <button class="chip" id="location-shortcut">Фильтр по локации</button>
+        <button class="chip" id="clear-filters">Сбросить фильтры</button>
+        <div class="muted">Нажмите «+» чтобы добавить найденное количество, либо измените число вручную.</div>
+      </div>
+      <div class="field">
+        <label for="session-note">Заметка по инвентаризации</label>
+        <textarea id="session-note" placeholder="Например: проверили кухню и бар, бой 3 бокала"></textarea>
+      </div>
+      <div class="list scroll" id="item-list"></div>
+      <div class="help">Подсчёт поддерживает поэтапное добавление из разных зон хранения. При сохранении будет запрошено подтверждение.</div>
+    </section>
+
+    <section class="panel" id="history">
+      <div class="section-title">
+        <h2>История и сравнение</h2>
+        <div class="stack">
+          <select id="baseline-select"></select>
+          <button class="btn small secondary" id="export-csv">Экспорт CSV</button>
+        </div>
+      </div>
+      <div class="scroll" id="history-list"></div>
+      <div class="divider"></div>
+      <div class="section-title">
+        <h2>Отчёт о расхождениях</h2>
+        <span class="muted" id="diff-label">Выберите инвентаризацию</span>
+      </div>
+      <div class="list scroll" id="diff-list"></div>
+    </section>
+  </div>
+
+  <script src="scripts/inventory.js" defer></script>
+</body>
+</html>
+
+    
